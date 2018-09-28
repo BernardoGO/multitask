@@ -4,13 +4,12 @@ import math
 import numpy as np
 from collections import deque
 
-import matplotlib.pyplot as plt
 
 import pickle
 import sys
-print("TETE")
+
 from solvers.sqn import SQNSolver
-print("TETE2")
+
 import os
 import numpy as np
 from PIL import Image
@@ -19,32 +18,13 @@ import argparse
 from util.GracefulKiller import GracefulKiller
 from config import Config
 from agents.regular import regular
-
-
+from util.output import output
 
 parser = argparse.ArgumentParser()
 parser.add_argument("r")
 args = parser.parse_args()
 
-
 run = int(args.r)
-
-###################### QUI 23-28       - CIFAR10
-
-
-
-# import argparse
-
-# parser = argparse.ArgumentParser()
-
-
-# parser.add_argument("k")
-# parser.add_argument("t")
-# parser.add_argument("c")
-# parser.add_argument("s")
-# args = parser.parse_args()
-
-#if args.a ==
 
 
 ### SET CONFIGs
@@ -61,7 +41,7 @@ env = gym.make(Config.__ENV__)
 Config._ACTION_SPACE = env.action_space.n
 Config.num_context = 2
 Config._ENV_SPACE = (250, 160, 3,)
-print("PASSSOu")
+
 Config.__USE_PRIOR_KNOWLEDGE__ = bool(run % 2)
 #config.__COMMENT__ = "{}-Size{}-Lw{}-Tl{}-Uk{}".format(__ENV__, __SIZE__, __COPY_LAST_WEIGHTS__, __TRAIN_LAST_LAYER__, __USE_PRIOR_KNOWLEDGE__)
 
@@ -74,27 +54,6 @@ Config.__USE_PRIOR_KNOWLEDGE__ = bool(run % 2)
 
 
 
-
-
-
-
-
-
-
-
-def printPos(hist,name, tname):
-    plt.clf()
-    with open(str(tname)+'-using-'+str(Config.__USE_PRIOR_KNOWLEDGE__)+'-'+Config.__COMMENT__+'.pickle', 'wb') as handle:
-        pickle.dump(hist, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    hist_ = hist.T
-    plt.plot(hist_[1])
-    plt.plot(hist_[2])
-    plt.plot(hist_[3])
-    plt.title('model accuracy')
-    plt.ylabel('average')
-    plt.xlabel('episode')
-    plt.legend(['max_step', 'AVG', 'AVG MAX'], loc='upper left')
-    plt.savefig(str(tname)+'accuracy'+str(name)+'.png')
 
     
     
@@ -179,7 +138,7 @@ for episode in range(0, Config.n_episodes):
         history = np.append(history, [[stepcnt, max_step, average, average_max, episode]], axis=0)    
     print("Episode: {}, Current: {}, MAX: {}, AVERAGE: {}".format(episode, stepcnt,max_step, average))
 
-printPos(history, episode, str(run))
+output.printPos(history, episode, str(run))
 
 
 
