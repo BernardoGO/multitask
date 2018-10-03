@@ -2,9 +2,9 @@ import math
 import numpy as np
 import random
 from config import Config
-from solvers.sqn import SQNSolver
+from solvers.random import RANDOMSolver
 
-class regular:
+class randomsolver:
 
 
     def __init__(self):
@@ -12,8 +12,8 @@ class regular:
         self.epsilon_min = 0.01
         self.epsilon_max = 1.0
         #epsilon = 1.0
-        self.policynet = SQNSolver()
-        self.targetnet = SQNSolver()
+        self.policynet = RANDOMSolver()
+        self.targetnet = RANDOMSolver()
         self.dec = 0
         self.reward_discount_factor = 0.20
 
@@ -23,7 +23,7 @@ class regular:
     def choose_action(self, state, episode, network):
         
         self.dec+=1
-        state_j = np.array([state.reshape(Config._ENV_SPACE)])
+        #state_j = np.array([state.reshape(Config._ENV_SPACE)])
         #return (0 if np.random.uniform() < 0.5 else 1) if (np.random.random() <= getEpsilon(episode)) else np.argmax(network.network.predict(state_j))
 
         return random.randint(0, Config._ACTION_SPACE-1)

@@ -17,7 +17,7 @@ from keras import backend as K
 import argparse
 from util.GracefulKiller import GracefulKiller
 from config import Config
-from agents.regular import regular
+from agents import *
 from util.output import output
 
 parser = argparse.ArgumentParser()
@@ -89,7 +89,7 @@ last100 = np.zeros(100)
 last100pos = 0
 history = np.array([])
 
-agent = regular()
+agent = rand.randomsolver()
 
 for episode in range(0, Config.n_episodes):
     #if episode == 0:

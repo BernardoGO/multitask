@@ -101,31 +101,4 @@ class RANDOMSolver:
         pass
 
     def replay(self):
-        GAMMA = 0.99
-        batch_size = min(64, len(self.memory))
-        con = np.array([Config.contex for x in range(batch_size)])
-        
-        batch = random.sample(self.memory, batch_size)
-        no_state = np.zeros(Config._ENV_SPACE)
-        states = np.array([ o[1] for o in batch ])
-        states_ = np.array([ (no_state if o[2] is None else o[2]) for o in batch ])
-
-
-
-        p = self.network.predict(states)[1]
-        p_ = self.network.predict(states_)[1]
-        x = np.zeros((batch_size, *Config._ENV_SPACE))
-        y = np.zeros((batch_size, Config._ACTION_SPACE))
-
-        for idx, single in enumerate(batch):
-            reward, state, state_, action, step = single
-            t = p[idx]
-            if state_ is None:
-                t[action] = reward
-            else:
-                t[action] = reward + GAMMA * np.amax(p_[idx][0:Config._ACTION_SPACE])
-            x[idx] = state
-            y[idx] = t
-        #self.network.fit(x, [con, y], batch_size=2, nb_epoch=1, verbose=False)
-        # main_dict = dict([(layer.name, layer) for layer in self.network.layers])
-        # print(main_dict["dense_2b"].get_weights()[0])
+        pass
