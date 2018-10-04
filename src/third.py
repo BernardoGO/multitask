@@ -84,14 +84,13 @@ print(["RUN", run])
 
 
 
-history = np.array([])
 
 agent = rand.randomagent()
-history = np.append(history, agent.play(env))
+history = agent.play(env)
 
 
 print(history)
-output.printPos(history, history[-1], str(run))
+output.printPos(history, history[-1][-1], str(run))
 
 
 
