@@ -4,7 +4,7 @@ import random
 from config import Config
 from solvers.sqn import SQNSolver
 
-class regular:
+class regularagent:
 
 
     def __init__(self):
@@ -33,3 +33,56 @@ class regular:
 
     def get_reward(self, reward, stepcnt):
         return reward # * math.log10((stepcnt+1*reward_discount_factor))
+
+    def play(self, env):
+        max_step = 0
+        average_max = 0
+        last100 = np.zeros(100)
+        last100pos = 0
+        history = np.array([])
+        for episode in range(0, Config.n_episodes):
+        
+            if Config.killer.kill_now:
+                print("KILLED")
+                break
+            state = env.reset()
+            state_ = None
+            done = False
+            stepcnt = 0
+            sum_reward = 0
+            while not done:
+                #env.render()
+                action = self.choose_action(state, episode, self.targetnet)
+                state_, reward, done, extra = env.step(action)
+                if done:  # terminal state
+
+                    state_ = None
+                sum_reward += reward#get_reward(reward, stepcnt)
+                #if max_step > 500:
+                #    env.render()
+
+                self.targetnet.remember(reward, state, state_, action, stepcnt)
+
+                
+                state = state_
+                stepcnt += 1
+                #print(stepcnt)
+            self.targetnet.replay()
+            if stepcnt > max_step:
+                max_step = stepcnt
+            last100[last100pos%100] = stepcnt
+            last100pos += 1
+            if episode <= 100:
+                average = np.average(last100[0:last100pos])
+            else:
+                average = np.average(last100)
+
+            if average > average_max:
+                average_max = average
+
+            if len(history) == 0:
+                history = [[stepcnt, max_step, average, average_max, episode]]
+            else:
+                history = np.append(history, [[stepcnt, max_step, average, average_max, episode]], axis=0)    
+            print("Episode: {}, Current: {}, MAX: {}, AVERAGE: {}".format(episode, stepcnt,max_step, average))
+        return history

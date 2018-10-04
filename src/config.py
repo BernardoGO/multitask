@@ -14,3 +14,4 @@ class Config:
     __COMMENT__ = lambda : "{}-Size{}-Lw{}-Tl{}-Uk{}".format(Config.__ENV__, Config.__SIZE__, Config.__COPY_LAST_WEIGHTS__, Config.__TRAIN_LAST_LAYER__, Config.__USE_PRIOR_KNOWLEDGE__)
 
     contex =  [1,0]
+    killer = None

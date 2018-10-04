@@ -69,7 +69,7 @@ Config.__USE_PRIOR_KNOWLEDGE__ = bool(run % 2)
 ####env = gym.make('Atlantis-ram-v0')
 
 
-killer = GracefulKiller()
+Config.killer = GracefulKiller()
 
 
 #for run in range(3,30):
@@ -83,62 +83,15 @@ print(["RUN", run])
 
 
 
-max_step = 0
-average_max = 0
-last100 = np.zeros(100)
-last100pos = 0
+
 history = np.array([])
 
-agent = rand.randomsolver()
+agent = rand.randomagent()
+history = np.append(history, agent.play(env))
 
-for episode in range(0, Config.n_episodes):
-    #if episode == 0:
-    #    episode = 929
-    if killer.kill_now:
-        print("KILLED")
-        break
-    state = env.reset()
-    state_ = None
-    done = False
-    stepcnt = 0
-    sum_reward = 0
-    while not done:
-        #env.render()
-        action = agent.choose_action(state, episode, agent.targetnet)
-        state_, reward, done, extra = env.step(action)
-        if done:  # terminal state
 
-            state_ = None
-        sum_reward += reward#get_reward(reward, stepcnt)
-        #if max_step > 500:
-        #    env.render()
-
-        agent.targetnet.remember(reward, state, state_, action, stepcnt)
-
-        
-        state = state_
-        stepcnt += 1
-        #print(stepcnt)
-    agent.targetnet.replay()
-    if stepcnt > max_step:
-        max_step = stepcnt
-    last100[last100pos%100] = stepcnt
-    last100pos += 1
-    if episode <= 100:
-        average = np.average(last100[0:last100pos])
-    else:
-        average = np.average(last100)
-
-    if average > average_max:
-        average_max = average
-
-    if len(history) == 0:
-        history = [[stepcnt, max_step, average, average_max, episode]]
-    else:
-        history = np.append(history, [[stepcnt, max_step, average, average_max, episode]], axis=0)    
-    print("Episode: {}, Current: {}, MAX: {}, AVERAGE: {}".format(episode, stepcnt,max_step, average))
-
-output.printPos(history, episode, str(run))
+print(history)
+output.printPos(history, history[-1], str(run))
 
 
 
