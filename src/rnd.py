@@ -41,6 +41,7 @@ env = gym.make(Config.__ENV__)
 Config._ACTION_SPACE = env.action_space.n
 Config.num_context = 2
 Config._ENV_SPACE = (250, 160, 3,)
+Config.__CMT__ = "Random"
 
 #Config.__USE_PRIOR_KNOWLEDGE__ = bool(run % 2)
 #config.__COMMENT__ = "{}-Size{}-Lw{}-Tl{}-Uk{}".format(__ENV__, __SIZE__, __COPY_LAST_WEIGHTS__, __TRAIN_LAST_LAYER__, __USE_PRIOR_KNOWLEDGE__)
@@ -85,7 +86,7 @@ print(["RUN", run])
 
 
 #agent = regular.regularagent()
-agent = aDrqn.drqnagent()
+agent = rand.randomagent()
 history = agent.play(env)
 
 

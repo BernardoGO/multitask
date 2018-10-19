@@ -6,7 +6,7 @@ from config import Config
 class output:
     def printPos(hist,name, tname):
         plt.clf()
-        with open(str(tname)+'-using-'+str(Config.__USE_PRIOR_KNOWLEDGE__)+'-'+Config.__COMMENT__()+'.pickle', 'wb') as handle:
+        with open(str(tname)+'-'+Config.__COMMENT__()+'.pickle', 'wb') as handle:
             pickle.dump(hist, handle, protocol=pickle.HIGHEST_PROTOCOL)
         hist_ = hist.T
         plt.plot(hist_[1])
