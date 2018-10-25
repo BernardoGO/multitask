@@ -48,9 +48,11 @@ for x in range(len(unpacked)):
 # h_falsee = h_falsee.T
 # h_truee = h_truee.T
 
-groups = {"-DRQN": 'blue', "-DQN": 'green',"-DRQN+": 'red',"-Random": 'yellow', "DRQN+ReLu": 'grey'}
 
+exclude = {"-DRQN": 'blue', "-DQN": 'green',"-DRQN+": 'red',"-Random": 'yellow', "DRQN+ReLu": 'grey'}
+groups = {'2LSTM': 'orange', '+Concat': 'black'}
 
+legenda = []
 
 alel = ['SCORE', 'MAX SCORE', 'AVG SCORE', 'AVG MAX SCORE']
 def printPos0(unpackeds,files,lvl):
@@ -62,7 +64,15 @@ def printPos0(unpackeds,files,lvl):
         y1 = x[lvl]
         col = 'red'
         #print(files[0])
+        contin = True
+        for tipes in exclude:
+            if files[idx].endswith( tipes):
+                contin = False
+                break
+        if contin == False:
+            continue
         
+        legenda.append(files[idx])
         for tipe in groups:
             if files[idx].endswith( tipe):
                 if tipe in grpCount:
@@ -85,7 +95,7 @@ def printPos0(unpackeds,files,lvl):
     #plt.legend(files, loc='lower right')#'max_step', 'AVG', 'AVG MAX'
 
     #print(files)
-    plt.legend(files, bbox_to_anchor=(1.04,1), borderaxespad=0)
+    plt.legend(legenda, bbox_to_anchor=(1.04,1), borderaxespad=0)
     #plt.subplots_adjust(right=0.7)
     # for var in (y1, y2):
     #     plt.annotate('%0.2f' % var.max(), xy=(1, var.max()), xytext=(4, 0), 

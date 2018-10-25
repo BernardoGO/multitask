@@ -2,7 +2,7 @@ import math
 import numpy as np
 import random
 from config import Config
-from solvers.sqn import SQNSolver
+from solvers.drqn import SQNSolver
 
 class drqnagent:
 
@@ -16,20 +16,32 @@ class drqnagent:
         self.targetnet = SQNSolver()
         self.dec = 0
         self.reward_discount_factor = 0.20
+        self.lstm_last = []
+        self.lstm_size = 4
+        self.lstm_pos = -1
 
     def getEpsilon(self, episode):
         return self.epsilon_min + (self.epsilon_max - self.epsilon_min) * math.exp(-self.epsilon_decay * episode)
 
     def choose_action(self, state, episode, network):
+        if self.lstm_pos == -1:
+            self.lstm_pos += 1
+            for x in range(self.lstm_size):
+                self.lstm_last.append(state)
+        memr = []
+        for x in range(self.lstm_pos - self.lstm_size, self.lstm_pos):
+            memr.append(self.lstm_last[x])
         
+        self.lstm_pos += 1
+        self.lstm_pos %= self.lstm_size
         self.dec+=1
-        state_j = np.array([state.reshape(Config._ENV_SPACE)])
+        #state_j = np.array([state.reshape(Config._ENV_SPACE)])
         #return (0 if np.random.uniform() < 0.5 else 1) if (np.random.random() <= getEpsilon(episode)) else np.argmax(network.network.predict(state_j))
         if random.random() < self.getEpsilon(episode):
             return random.randint(0, Config._ACTION_SPACE-1)
         else:
             #print("Se")
-            return np.argmax(network.network.predict(state_j)[1][0:Config._ACTION_SPACE])
+            return np.argmax(network.network.predict(np.array([memr]))[1][0:Config._ACTION_SPACE])
 
     def get_reward(self, reward, stepcnt):
         return reward # * math.log10((stepcnt+1*reward_discount_factor))
