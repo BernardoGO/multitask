@@ -17,7 +17,7 @@ class drqnagent:
         self.dec = 0
         self.reward_discount_factor = 0.20
         self.lstm_last = []
-        self.lstm_size = 4
+        self.lstm_size = 10
         self.lstm_pos = -1
 
     def getEpsilon(self, episode):

@@ -26,7 +26,7 @@ class SQNSolver:
         self.qnetwork()
 
         self.lstm_last = []
-        self.lstm_size = 4
+        self.lstm_size = 10
         self.lstm_pos = -1
 
 
@@ -38,7 +38,7 @@ class SQNSolver:
         # model.add(Dense(output_dim=128, activation='relu', input_dim=4))
         # model.add(Dense(output_dim=2, activation='linear'))
         print(Config._ENV_SPACE)
-        model_input_shape = tuple([4 ] + Config._ENV_SPACE)
+        model_input_shape = tuple([10 ] + Config._ENV_SPACE)
         a = Input(shape=model_input_shape)
         #tuple([timestep] + list(input_shape) + [num_frame])
         if Config.__USE_PRIOR_KNOWLEDGE__:
@@ -50,7 +50,7 @@ class SQNSolver:
         max_1 = TimeDistributed(MaxPooling2D(pool_size=(2, 2), name="max_1"))(conv_2)
         drop_1 = TimeDistributed(Dropout(0.25, name="drop_1"))(max_1)
         flatten_0 = TimeDistributed(Flatten(name="flatten_1"))(drop_1)
-        flatten_1 = LSTM(24, activation='relu')(flatten_0)
+        flatten_1 = LSTM(24, activation='tanh')(flatten_0)
         dense_1 = Dense(24, activation='relu', name="dense_1")(flatten_1)
 
         dense_1_probB = Dense(24, activation='relu', name="dense_1_probB")(flatten_1)
@@ -145,7 +145,7 @@ class SQNSolver:
             self.memory.pop(0)
 
     def get_nostate(self):
-        no_state = np.array(np.zeros((4, *Config._ENV_SPACE)))
+        no_state = np.array(np.zeros((10, *Config._ENV_SPACE)))
         print("nostate")
         return no_state
 
@@ -155,7 +155,7 @@ class SQNSolver:
         con = np.array([Config.contex for x in range(batch_size)])
         
         batch = random.sample(self.memory, batch_size)
-        no_state = np.array(np.zeros((4, *Config._ENV_SPACE)))
+        no_state = np.array(np.zeros((10, *Config._ENV_SPACE)))
         states = np.array([ o[1] for o in batch ])
 
         states_ = []
@@ -170,7 +170,7 @@ class SQNSolver:
                     print("NO STATE")
             #else:
             #    print("STATE")
-            states_.append(appn.reshape((4,250,160,3)))
+            states_.append(appn.reshape((10,250,160,3)))
         #(4,250,160,3) 
         states_ = np.array(states_ )
         #states_ = np.array([ (no_state if o[2] is None else o[2]) for o in batch ])
@@ -180,7 +180,7 @@ class SQNSolver:
         p = self.network.predict(states)[1]
         print("Replaying")
         p_ = self.network.predict(states_)[1]
-        x = np.zeros((batch_size,4, *Config._ENV_SPACE))
+        x = np.zeros((batch_size,10, *Config._ENV_SPACE))
         y = np.zeros((batch_size, Config._ACTION_SPACE))
 
         for idx, single in enumerate(batch):

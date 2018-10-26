@@ -10,7 +10,7 @@ class Config:
     __COPY_LAST_WEIGHTS__ = None#bool(int(args.c))
     __SIZE__ = 0#int(args.s)
     __ENV__ = 'AirRaid-v0'
-    __CMT__ = "RealDRQN"
+    __CMT__ = "RealDRQN+Tanh"
 
     ##A DRQN+ usa Tanh na ativação da LSTM
 

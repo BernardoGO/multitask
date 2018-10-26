@@ -50,7 +50,7 @@ for x in range(len(unpacked)):
 
 
 exclude = {}
-groups = {'ReadDRQN': 'orange', 'Random': 'black', "DQN": 'green'}
+groups = {'ReadDRQN': 'orange', 'Random': 'black', "DQN": 'green', 'Tanh':'blue'}
 
 legenda = []
 
