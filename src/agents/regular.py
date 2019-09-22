@@ -34,13 +34,13 @@ class regularagent:
     def get_reward(self, reward, stepcnt):
         return reward # * math.log10((stepcnt+1*reward_discount_factor))
 
-    def play(self, env):
+    def play(self, env, startEpisode = 0):
         max_step = 0
         average_max = 0
         last100 = np.zeros(100)
         last100pos = 0
         history = np.array([])
-        for episode in range(0, Config.n_episodes):
+        for episode in range(startEpisode, Config.n_episodes):
         
             if Config.killer.kill_now:
                 print("KILLED")

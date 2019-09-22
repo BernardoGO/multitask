@@ -1,0 +1,250 @@
+import keras
+from keras.models import Sequential, Model
+from keras.layers import Dense, Input, Concatenate,concatenate
+from keras.optimizers import Adam, RMSprop
+from keras.models import load_model
+from keras.datasets import cifar10
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential, Model
+from keras.layers import Dense, Dropout, Activation, Flatten, LSTM
+from keras.layers import Conv2D, MaxPooling2D, Input, concatenate, ConvLSTM2D, GRU
+from keras.models import load_model
+from keras.layers.wrappers import TimeDistributed
+import random
+import numpy as np
+from config import Config
+
+
+
+class SQNSolver:
+    lstm_size = 4
+    def __init__(self, loadWeights=False, autoInitialize=True):
+        
+        self.modelToLoad = ""
+        self.contextToLoad = None
+        self.memory = []
+        self.memory_size = 5000
+        self.network = None
+        self.loadWeights = loadWeights
+
+        
+
+        self.lstm_last = []
+        
+        self.lstm_pos = -1
+
+        if autoInitialize:
+            self.qnetwork()
+
+    def initialize(self):
+        self.qnetwork()
+
+    def qnetwork(self, alpha=0.00025):
+        # model = Sequential()
+
+        # model.add(Dense(output_dim=128, activation='relu', input_dim=4))
+        # model.add(Dense(output_dim=128, activation='relu', input_dim=4))
+        # model.add(Dense(output_dim=2, activation='linear'))
+        print(Config._ENV_SPACE)
+        model_input_shape = tuple([SQNSolver.lstm_size ] + Config._ENV_SPACE)
+
+        a = Input(shape=model_input_shape)
+        #tuple([timestep] + list(input_shape) + [num_frame])
+        if Config.__USE_PRIOR_KNOWLEDGE__ and self.loadWeights:
+            print("LOADING MODEL1.... " + self.modelToLoad)
+            model_main = load_model(self.modelToLoad)
+            if self.contextToLoad is not None:
+                print("LOADING CONTEXT1.... " + self.contextToLoad)
+                model_context = load_model(self.contextToLoad)
+            
+        #flatten_1 = GRU(8, activation="relu")(flatten_0)
+        
+        conv_1 = TimeDistributed(Conv2D(32, kernel_size=(6, 6), activation='relu', name="conv_1"), name="td_conv_1")(a)
+        max_0 = TimeDistributed(MaxPooling2D(pool_size=(4, 4), name="max_"), name="td_max_")(conv_1)
+        #conv_2 = TimeDistributed(Conv2D(32, (6, 6), activation='relu', name="conv_2"))(max_0)
+        #max_1 = TimeDistributed(MaxPooling2D(pool_size=(6, 6), name="max_1"))(conv_2)
+        drop_1 = TimeDistributed(Dropout(0.25, name="drop_1"), name="td_drop_1")(max_0)
+        flatten_0 = TimeDistributed(Flatten(name="flatten_1"),name="td_flatten_1")(drop_1)
+        #flatten_1 = LSTM(16)(flatten_0)
+        
+        dense_1 = TimeDistributed(Dense(16, activation='relu', name="dense_1"), name="td_dense_1")(flatten_0)
+
+        dense_1_probB = TimeDistributed(Dense(16, activation='relu', name="dense_1_probB"), name="td_dense_1_probB")(flatten_0)
+
+        concat_2 = concatenate([dense_1, dense_1_probB])
+
+        #drop_2 = Dropout(0.2, name="drop_2")(concat_2)
+
+        flatten_1 = keras.layers.GRU(16, activation="relu", name="flatten_1")(concat_2)
+        context = Dense(Config.num_context, activation='softmax', name="context")(flatten_1)
+
+        dense_2 = Dense(Config._ACTION_SPACE, activation='softmax', name="dense_2")(flatten_1)
+
+
+        #concat_2 = concatenate([context, dense_2])
+
+        #context = Model(inputs=a, outputs=dense_2)
+        model = Model(inputs=a, outputs=[context,dense_2])
+        
+
+        
+
+        #model = Model(inputs=a, outputs=[context,dense_2])
+        #model = Model(inputs=a, outputs=dense_3_act_3)
+
+
+
+
+        opt = RMSprop(lr=alpha)
+        model.compile(loss='mse', optimizer=opt)
+
+
+        if Config.__USE_PRIOR_KNOWLEDGE__ and self.loadWeights:
+            print("LOADING WEIGHTS....")
+            model_dict = dict([(layer.name, layer) for layer in model.layers])
+            main_dict = dict([(layer.name, layer) for layer in model_main.layers])
+            
+            model_dict['td_conv_1'].set_weights(main_dict['time_distributed_7'].get_weights())
+            
+            model_dict['td_max_'].set_weights(main_dict['time_distributed_8'].get_weights())
+
+            model_dict['td_drop_1'].set_weights(main_dict['time_distributed_9'].get_weights())
+            #model_dict['max_0'].set_weights(main_dict['max_0'].get_weights())
+
+            model_dict['td_flatten_1'].set_weights(main_dict['time_distributed_10'].get_weights())
+            model_dict['td_dense_1'].set_weights(main_dict['time_distributed_11'].get_weights())
+            
+            model_dict['context'].set_weights(main_dict['context'].get_weights())
+            if self.contextToLoad is not None:
+
+                print("LOADING CONTEXT....")
+                model_dict['td_dense_1_probB'].set_weights(model_context['time_distributed_12'].get_weights())
+                model_dict['context'].set_weights(model_context['context'].get_weights())
+                model_dict['dense_2'].set_weights(model_context['dense_2'].get_weights())
+                
+            print("WEIGHTS LOADED")
+            
+
+        self.network = model
+
+    def updateFrom(self, value,rate=0.0001):
+        weights_list = value.network.get_weights()
+        self.network.set_weights(np.multiply(weights_list,rate))
+
+    def fullUpdateFrom(self, value):
+        weights_list = value.network.get_weights()
+        self.network.set_weights(weights_list)
+
+    def remember(self, reward, state, state_, action, step):
+        
+        
+        
+
+        
+
+        
+
+        if self.lstm_pos == -1:
+            self.lstm_pos += 1
+            for x in range(self.lstm_size):
+                self.lstm_last.append(state)
+
+        self.lstm_last[self.lstm_pos % SQNSolver.lstm_size] = state
+        memr = None
+        memr_ = None
+        #for x in range(self.lstm_pos - self.lstm_size, self.lstm_pos):
+        #    memr.append(self.lstm_last[x])
+            
+        for x in range(self.lstm_pos - SQNSolver.lstm_size, self.lstm_pos):
+            if memr is None:
+                memr = np.array(self.lstm_last[x]).reshape((1,250,160,3))
+            else:
+                arr = np.array(self.lstm_last[x]).reshape((1,250,160,3))
+                memr = np.vstack((memr, arr))
+
+        #for x in range(self.lstm_pos - self.lstm_size +1, self.lstm_pos):
+        #    memr_.append(self.lstm_last[x-1])
+        #memr_.append(state_)
+
+        for x in range(self.lstm_pos - SQNSolver.lstm_size +1, self.lstm_pos):
+            if memr_ is None:
+                memr_ = np.array(self.lstm_last[x-1]).reshape((1,250,160,3))
+            else:
+                arr = np.array(self.lstm_last[x-1]).reshape((1,250,160,3))
+                memr_ = np.vstack((memr_, arr))
+        if state_ is None:
+            state_ = np.array(np.zeros( Config._ENV_SPACE))
+        memr_ = np.vstack((memr_, np.array(state_).reshape((1,250,160,3))))
+
+        self.lstm_pos += 1
+        self.lstm_pos %= SQNSolver.lstm_size
+        if len(self.memory) > self.memory_size:
+            self.memory.pop(0)
+        self.memory.append([reward, np.array(memr), np.array(memr_), action, step])
+        
+        """
+        GAMMA = 0.99
+        #states_ = []
+        #states_.append(state_.reshape((1,250,160,3)))
+        p_ = self.network.predict(np.array([np.array(memr_)]))[1]
+        t = p_[0]
+        t[action] = reward + GAMMA * np.amax(p_[0][0:Config._ACTION_SPACE])
+
+        con = np.array([Config.contex for x in range(1)])
+
+        x = np.array([np.array(memr)])
+        #print(con)
+        self.network.fit(x, [con, np.array([t]) ], batch_size=1, nb_epoch=1, verbose=False)
+        """
+
+    def get_nostate(self):
+        no_state = np.array(np.zeros((10, *Config._ENV_SPACE)))
+        print("nostate")
+        return no_state
+
+    def replay(self):
+        GAMMA = 0.99
+        batch_size = min(128, len(self.memory))
+        con = np.array([Config.contex for x in range(batch_size)])
+        
+        batch = random.sample(self.memory, batch_size)
+        no_state = np.array(np.zeros((SQNSolver.lstm_size, *Config._ENV_SPACE)))
+        states = np.array([ o[1] for o in batch ])
+
+        states_ = []
+
+        for o in batch:
+            appn = o[2]
+            if o[2] is None:
+                appn = no_state
+            for x in o[2]:
+                if x is None:
+                    appn = no_state
+                    print("NO STATE")
+            #else:
+            #    print("STATE")
+            states_.append(appn.reshape((SQNSolver.lstm_size,250,160,3)))
+        #(4,250,160,3) 
+        states_ = np.array(states_ )
+        #states_ = np.array([ (no_state if o[2] is None else o[2]) for o in batch ])
+
+
+
+        p = self.network.predict(states)[1]
+        print("Replaying")
+        p_ = self.network.predict(states_)[1]
+        x = np.zeros((batch_size,SQNSolver.lstm_size, *Config._ENV_SPACE))
+        y = np.zeros((batch_size, Config._ACTION_SPACE))
+
+        for idx, single in enumerate(batch):
+            reward, state, state_, action, step = single
+            t = p[idx]
+            if state_ is None:
+                t[action] = reward
+            else:
+                t[action] = reward + GAMMA * np.amax(p_[idx][0:Config._ACTION_SPACE])
+            x[idx] = state
+            y[idx] = t
+        self.network.fit(x, [con, y], batch_size=2, nb_epoch=1, verbose=False)
+        # main_dict = dict([(layer.name, layer) for layer in self.network.layers])
+        # print(main_dict["dense_2b"].get_weights()[0])

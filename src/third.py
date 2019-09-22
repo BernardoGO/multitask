@@ -29,14 +29,15 @@ run = int(args.r)
 
 ### SET CONFIGs
 
-Config.n_episodes = 350
+Config.n_episodes = 1000
 
-Config.__USE_PRIOR_KNOWLEDGE__ = False#bool(int(args.k))
+Config.__USE_PRIOR_KNOWLEDGE__ = True#bool(int(args.k))
 Config.__TRAIN_LAST_LAYER__ = True#bool(int(args.t))
 Config.__COPY_LAST_WEIGHTS__ = False#bool(int(args.c))
 Config.__SIZE__ = 128#int(args.s)
+Config.contex =  [0,1]
 
-Config.__ENV__ = 'AirRaid-v0'
+Config.__ENV__ = 'Assault-v0'#'AirRaid-v0'
 env = gym.make(Config.__ENV__)
 Config._ACTION_SPACE = env.action_space.n
 Config.num_context = 2
@@ -85,8 +86,16 @@ print(["RUN", run])
 
 
 #agent = regular.regularagent()
-agent = aDrqn.drqnagent()
-history = agent.play(env)
+agent = smallDrqn.smalldrqnagent()
+#agent.targetnet.modelToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/data_mt/8742-SmallDRQN1Cont.h5"
+
+#agent.targetnet.contextToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/data_mt/8738-SmallDRQN1_AirRaid.h5"
+agent.targetnet.modelToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/data_mt/8738-SmallDRQN1_AirRaid.h5"
+#agent = rand.randomagent()
+#agent.targetnet.network.save('3066-DQN30001.h5')
+
+agent.targetnet.initialize()
+history = agent.play(env, startEpisode = 0)
 
 
 print(history)
@@ -95,4 +104,4 @@ output.printPos(history, history[-1][-1], str(run))
 
 
 
-agent.targetnet.network.save(str(run)+'-fourth.h5')
+agent.targetnet.network.save(str(run)+'-SmallDRQN1Cont.h5')

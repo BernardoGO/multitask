@@ -1,1 +1,1 @@
-__all__ = ["rand", "regular", "aDrqn"]
+__all__ = ["rand", "regular", "aDrqn", "smallDrqn"]

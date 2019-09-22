@@ -9,8 +9,9 @@ class Config:
     __TRAIN_LAST_LAYER__ = None#bool(int(args.t))
     __COPY_LAST_WEIGHTS__ = None#bool(int(args.c))
     __SIZE__ = 0#int(args.s)
-    __ENV__ = 'AirRaid-v0'
-    __CMT__ = "RealDRQN+Tanh"
+    #__ENV__ = 'AirRaid-v0'
+    __CMT__ = "DRQN1"
+    
 
     ##A DRQN+ usa Tanh na ativação da LSTM
 
@@ -18,5 +19,5 @@ class Config:
     #__COMMENT__ = lambda : "{}-{}-Size{}-Lw{}-Tl{}-Uk{}".format(Config.__CMT__,Config.__ENV__, Config.__SIZE__, Config.__COPY_LAST_WEIGHTS__, Config.__TRAIN_LAST_LAYER__, Config.__USE_PRIOR_KNOWLEDGE__)
     __COMMENT__ = lambda : "{}".format(Config.__CMT__)
 
-    contex =  [1,0]
+    contex =  None
     killer = None

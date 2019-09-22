@@ -9,6 +9,9 @@ import pickle
 import glob
 import pandas as pd
 
+#Nos primeros 10, sem agrupar, cada grafico com 1 ou 1vsrandom
+#Maior e menor ponto, desvio padrão, media
+
 def addToPlotDiffCent(scores_, labelx, col, posx=1, maxpos=1):
     scores = calcAvgOfX(scores_, 10)
     y1 = []
@@ -22,7 +25,7 @@ def addToPlotDiffCent(scores_, labelx, col, posx=1, maxpos=1):
 
 
 def addToPlotDiffProg(scores_, labelx, col, posx=1, maxpos=1, padding=0.3):
-    scores = calcAvgOfX(scores_, 10)
+    scores = calcAvgOfX(scores_, 1)
     y1 = []
 
     for pos in range(0, len(scores)-1, 1):
@@ -113,8 +116,8 @@ def loadFiles(loadgroups):
 def plotScoresAll(dtframe, label, color, posx = 1, maxn = 1):
     dataframe = pd.DataFrame(data=dtframe, columns=columnsofdt)
     scores = dataframe['SCORE']
-    addToPlotAvgOfX(scores, 10, label, color)
-    addToPlotDiffProg(scores, label, color, posx, maxn)
+    #addToPlotAvgOfX(scores, 10, label, color)
+    addToPlotDiffCent(scores, label, color, posx, maxn)
 
 groups = {  'RealDRQN': 'orange',
             'Random': 'black',
@@ -163,7 +166,7 @@ for runtst in processed:
 #plt.gca().set_ylim(top=1100, bottom=500)
 
 plt.title('Assault - Atari')
-plt.ylabel("labl")
+plt.ylabel("Diferença Regressiva")
 plt.xlabel('episode')
 plt.legend(bbox_to_anchor=(1.04,1), borderaxespad=0)
 plt.savefig('compa9'+'.png', bbox_inches="tight")
