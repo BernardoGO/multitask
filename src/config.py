@@ -18,6 +18,6 @@ class Config:
     #__COMMENT__ = "{}-Size{}-Lw{}-Tl{}-Uk{}".format(__ENV__, __SIZE__, __COPY_LAST_WEIGHTS__, __TRAIN_LAST_LAYER__, __USE_PRIOR_KNOWLEDGE__)
     #__COMMENT__ = lambda : "{}-{}-Size{}-Lw{}-Tl{}-Uk{}".format(Config.__CMT__,Config.__ENV__, Config.__SIZE__, Config.__COPY_LAST_WEIGHTS__, Config.__TRAIN_LAST_LAYER__, Config.__USE_PRIOR_KNOWLEDGE__)
     __COMMENT__ = lambda : "{}".format(Config.__CMT__)
-
+    __FOLDER__ = None#"/run/media/bernardo/481EDFB11EDF95F2/multiruns/"
     contex =  None
     killer = None

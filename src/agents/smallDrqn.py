@@ -4,6 +4,7 @@ import random
 from config import Config
 from solvers.smallDrqn import SQNSolver
 import metrics.dbs
+import pickle
 
 class smalldrqnagent:
 
@@ -22,8 +23,44 @@ class smalldrqnagent:
         self.lstm_size = 4
         self.lstm_pos = -1
 
-        self.history = np.array([])
+        self.history = None
         self.dbs1 = []
+
+
+    def loadAll(self, run):
+        self.loadLstmLast(run)
+        self.loadHistory(run)
+        self.loadMemoryTarget(run)
+
+    def saveAll(self, run):
+        self.saveHistory(run)
+        self.saveLstmLast(run)
+        self.saveMemoryTarget(run)
+
+
+    def loadMemoryTarget(self, run):
+        self.targetnet.loadMemory(run)
+
+    def saveMemoryTarget(self, run):
+        self.targetnet.saveMemory(run)
+
+    def saveLstmLast(self, run):
+        with open(Config.__FOLDER__ +str(run)+'_LstmLast.pickle', 'wb') as handle:
+            pickle.dump(self.lstm_last, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def loadLstmLast(self, run):
+        with open(Config.__FOLDER__ +str(run)+'_LstmLast.pickle', 'rb') as handle:
+            self.lstm_last = pickle.load(handle)
+
+
+    def saveHistory(self, run):
+        with open(Config.__FOLDER__ +str(run)+'_history.pickle', 'wb') as handle:
+            pickle.dump(self.history, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def loadHistory(self, run):
+        with open(Config.__FOLDER__ +str(run)+'_history.pickle', 'rb') as handle:
+            self.history = pickle.load(handle)
+        
 
     def clearKnowledge(self):
         self.targetnet.fullUpdateFrom(self.policynet)
@@ -73,7 +110,8 @@ class smalldrqnagent:
         last100pos = 0
         rw_last100 = np.zeros(100)
         rw_last100pos = 0
-        self.history = np.array([])
+        if self.history is None:
+            self.history = np.array([])
         for episode in range(startEpisode, Config.n_episodes):
             #if episode == 3000:
             #    print("CLEARING WEIGHTS")

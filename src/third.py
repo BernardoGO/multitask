@@ -3,7 +3,7 @@ import gym
 import math
 import numpy as np
 from collections import deque
-
+import pickle
 
 import pickle
 import sys
@@ -35,9 +35,9 @@ Config.__USE_PRIOR_KNOWLEDGE__ = True#bool(int(args.k))
 Config.__TRAIN_LAST_LAYER__ = True#bool(int(args.t))
 Config.__COPY_LAST_WEIGHTS__ = False#bool(int(args.c))
 Config.__SIZE__ = 128#int(args.s)
-Config.contex =  [0,1]
+Config.contex =  [1,0]
 
-Config.__ENV__ = 'Assault-v0'#'AirRaid-v0'
+Config.__ENV__ = 'AirRaid-v0'#'Assault-v0','AirRaid-v0'
 env = gym.make(Config.__ENV__)
 Config._ACTION_SPACE = env.action_space.n
 Config.num_context = 2
@@ -89,8 +89,9 @@ print(["RUN", run])
 agent = smallDrqn.smalldrqnagent()
 #agent.targetnet.modelToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/data_mt/8742-SmallDRQN1Cont.h5"
 
-#agent.targetnet.contextToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/data_mt/8738-SmallDRQN1_AirRaid.h5"
-agent.targetnet.modelToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/data_mt/8738-SmallDRQN1_AirRaid.h5"
+agent.targetnet.modelToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/8798-SmallDRQN1Cont.h5"
+agent.targetnet.contextToLoad = "/home/bernardo/Google Drive/Projects/msc/multitask/8794-SmallDRQN1Cont.h5"
+#"/home/bernardo/Google Drive/Projects/msc/multitask/data_mt/8738-SmallDRQN1_AirRaid.h5"
 #agent = rand.randomagent()
 #agent.targetnet.network.save('3066-DQN30001.h5')
 

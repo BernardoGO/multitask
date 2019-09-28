@@ -13,7 +13,7 @@ from keras.layers.wrappers import TimeDistributed
 import random
 import numpy as np
 from config import Config
-
+import pickle
 
 
 class SQNSolver:
@@ -38,6 +38,15 @@ class SQNSolver:
 
     def initialize(self):
         self.qnetwork()
+
+
+    def saveMemory(self, run):
+        with open(Config.__FOLDER__ +str(run)+'_Memory.pickle', 'wb') as handle:
+            pickle.dump(self.memory, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def loadMemory(self, run):
+        with open(Config.__FOLDER__ +str(run)+'_Memory.pickle', 'rb') as handle:
+            self.memory = pickle.load(handle)
 
     def qnetwork(self, alpha=0.00025):
         # model = Sequential()
@@ -103,24 +112,26 @@ class SQNSolver:
             print("LOADING WEIGHTS....")
             model_dict = dict([(layer.name, layer) for layer in model.layers])
             main_dict = dict([(layer.name, layer) for layer in model_main.layers])
+            if self.contextToLoad is not None:
+                context_dict = dict([(layer.name, layer) for layer in model_context.layers])
             
-            model_dict['td_conv_1'].set_weights(main_dict['time_distributed_7'].get_weights())
+            model_dict['td_conv_1'].set_weights(main_dict['td_conv_1'].get_weights())
             
-            model_dict['td_max_'].set_weights(main_dict['time_distributed_8'].get_weights())
+            model_dict['td_max_'].set_weights(main_dict['td_max_'].get_weights())
 
-            model_dict['td_drop_1'].set_weights(main_dict['time_distributed_9'].get_weights())
+            model_dict['td_drop_1'].set_weights(main_dict['td_drop_1'].get_weights())
             #model_dict['max_0'].set_weights(main_dict['max_0'].get_weights())
 
-            model_dict['td_flatten_1'].set_weights(main_dict['time_distributed_10'].get_weights())
-            model_dict['td_dense_1'].set_weights(main_dict['time_distributed_11'].get_weights())
+            model_dict['td_flatten_1'].set_weights(main_dict['td_flatten_1'].get_weights())
+            model_dict['td_dense_1'].set_weights(main_dict['td_dense_1'].get_weights())
             
             model_dict['context'].set_weights(main_dict['context'].get_weights())
             if self.contextToLoad is not None:
 
                 print("LOADING CONTEXT....")
-                model_dict['td_dense_1_probB'].set_weights(model_context['time_distributed_12'].get_weights())
-                model_dict['context'].set_weights(model_context['context'].get_weights())
-                model_dict['dense_2'].set_weights(model_context['dense_2'].get_weights())
+                model_dict['td_dense_1_probB'].set_weights(context_dict['td_dense_1_probB'].get_weights())
+                model_dict['context'].set_weights(context_dict['context'].get_weights())
+                model_dict['dense_2'].set_weights(context_dict['dense_2'].get_weights())
                 
             print("WEIGHTS LOADED")
             
@@ -248,3 +259,31 @@ class SQNSolver:
         self.network.fit(x, [con, y], batch_size=2, nb_epoch=1, verbose=False)
         # main_dict = dict([(layer.name, layer) for layer in self.network.layers])
         # print(main_dict["dense_2b"].get_weights()[0])
+
+
+
+
+"""
+print("LOADING WEIGHTS....")
+            model_dict = dict([(layer.name, layer) for layer in model.layers])
+            main_dict = dict([(layer.name, layer) for layer in model_main.layers])
+            
+            model_dict['td_conv_1'].set_weights(main_dict['time_distributed_7'].get_weights())
+            
+            model_dict['td_max_'].set_weights(main_dict['time_distributed_8'].get_weights())
+
+            model_dict['td_drop_1'].set_weights(main_dict['time_distributed_9'].get_weights())
+            #model_dict['max_0'].set_weights(main_dict['max_0'].get_weights())
+
+            model_dict['td_flatten_1'].set_weights(main_dict['time_distributed_10'].get_weights())
+            model_dict['td_dense_1'].set_weights(main_dict['time_distributed_11'].get_weights())
+            
+            model_dict['context'].set_weights(main_dict['context'].get_weights())
+            if self.contextToLoad is not None:
+
+                print("LOADING CONTEXT....")
+                model_dict['td_dense_1_probB'].set_weights(model_context['time_distributed_12'].get_weights())
+                model_dict['context'].set_weights(model_context['context'].get_weights())
+                model_dict['dense_2'].set_weights(model_context['dense_2'].get_weights())
+
+"""
